@@ -1,0 +1,92 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>assets\ExifDog.ico</ApplicationIcon>
+    <UseWindowsForms>False</UseWindowsForms>
+    <AnalysisLevel>none</AnalysisLevel>
+    <PackageIcon>ExifDog-900KB.png</PackageIcon>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="assets\ExifDog.ico" />
+    <None Remove="nature_hd_background-wallpaper-1920x1080.jpg" />
+    <None Remove="Zips\exiftool-13.27_64.zip" />
+    <None Remove="Zips\ImageMagick-7.1.1-47-portable-Q16-HDRI-x64.zip" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<!-- 确保 Zips 下的压缩包随着编译拷贝到输出目录 -->
+		<Resource Include="Zips\ffmpeg-7.1.1-essentials_build.zip">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Resource>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Resource Include="Zips\exiftool-13.27_64.zip">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Resource>
+	  <Resource Include="Zips\ImageMagick-7.1.1-47-portable-Q16-HDRI-x64.zip">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Resource>
+	</ItemGroup>
+	
+	<ItemGroup>
+		<Content Include="Zips\**\*">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <Compile Remove="ProgressConverters.cs" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <Content Include="assets\ExifDog-900KB.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="assets\ExifDog.ico" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <None Include="C:\Users\Administrator\Downloads\ExifDog-900KB.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	  <None Include="utils\ProgressConverters.cs" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <Resource Include="assets\ExifDog.ico">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Resource>
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <None Update="assets\ExifDog-900KB.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	  <None Update="Properties\Settings.settings">
+	    <Generator>SettingsSingleFileGenerator</Generator>
+	  </None>
+	  <None Update="Settings.settings">
+	    <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+	    <Generator>SettingsSingleFileGenerator</Generator>
+	  </None>
+	</ItemGroup>
+	
+</Project>

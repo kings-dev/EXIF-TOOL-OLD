@@ -1,0 +1,627 @@
+﻿<Window x:Class="Hui_WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Hui_WPF"
+        mc:Ignorable="d"
+        Title="ExifDog - EXIF or Video Tool" Height="900" Width="1120"
+        AllowDrop="True" DragEnter="Window_DragEnter" Drop="Window_Drop"
+        Closing="Window_Closing" MinWidth="900" MinHeight="750"
+        Loaded="Window_Loaded"
+        PreviewKeyDown="Window_PreviewKeyDown"
+        Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+
+    <Window.Resources>
+        <Thickness x:Key="ControlMargin">0,3,0,3</Thickness>
+        <Thickness x:Key="GroupMargin">0,0,10,0</Thickness>
+        <Thickness x:Key="SectionMargin">0,5,0,5</Thickness>
+        <Thickness x:Key="InnerGroupPadding">10,8</Thickness>
+        <CornerRadius x:Key="ControlCornerRadius">3</CornerRadius>
+
+        <!-- Icon Sizes -->
+        <Style TargetType="Image">
+            <Setter Property="Width" Value="16"/>
+            <Setter Property="Height" Value="16"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,5,0"/>
+        </Style>
+
+        <Style x:Key="BaseButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="Margin" Value="{StaticResource ControlMargin}"/>
+            <Setter Property="MinWidth" Value="80"/>
+            <Setter Property="MinHeight" Value="26"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{StaticResource ControlCornerRadius}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter x:Name="contentPresenter" Focusable="False"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              Margin="{TemplateBinding Padding}"
+                                              RecognizesAccessKey="True"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#FFBEE6FD"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#FF3C7FB1"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#FFC4E5F6"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#FF2C628B"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.6"/>
+                                <Setter Property="Cursor" Value="Arrow"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Background" Value="#FFDDDDDD"/>
+            <Setter Property="BorderBrush" Value="#FF707070"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+        </Style>
+
+        <Style x:Key="BrowseButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}"/>
+
+        <Style x:Key="StartProcessingButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Height" Value="45"/>
+            <Setter Property="Width" Value="150"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Background" Value="#FF20B2AA"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#FF1A8A8A"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FF25C8BD"/>
+                    <Setter Property="BorderBrush" Value="#FF1A8A8A"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#FF1EAE9F"/>
+                    <Setter Property="BorderBrush" Value="#FF147870"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="GenerateButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Height" Value="45"/>
+            <Setter Property="Width" Value="150"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Background" Value="DarkSlateBlue"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#FF3A2D6C"/>
+            <Setter Property="Margin" Value="0"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FF5C4B9A"/>
+                    <Setter Property="BorderBrush" Value="#FF3A2D6C"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#FF483D8B"/>
+                    <Setter Property="BorderBrush" Value="#FF2D235A"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="GroupBox">
+            <Setter Property="Padding" Value="{StaticResource InnerGroupPadding}"/>
+            <Setter Property="Margin" Value="{StaticResource GroupMargin}"/>
+            <Setter Property="BorderBrush" Value="LightGray"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"/>
+            <Setter Property="HeaderTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,3"/>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="OptionLabelStyle" TargetType="Label">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,5,0"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+        <Style x:Key="OptionCheckBoxStyle" TargetType="CheckBox">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="{StaticResource ControlMargin}"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style x:Key="OptionTextBoxStyle" TargetType="TextBox">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="{StaticResource ControlMargin}"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="MinWidth" Value="80"/>
+            <Setter Property="Padding" Value="3,0"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="{StaticResource ControlMargin}"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="MinWidth" Value="100"/>
+        </Style>
+        <Style TargetType="Separator">
+            <Setter Property="Margin" Value="0,8"/>
+        </Style>
+
+        <!-- Drop Area Style - Basic Appearance Only, No Triggers -->
+        <Style x:Key="DropBorderStyle" TargetType="Border">
+            <Setter Property="BorderBrush" Value="Gray"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Background" Value="#FFE8E8E8"/>
+            <Setter Property="Margin" Value="0,5,0,5"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="LightGray" Direction="320" ShadowDepth="5" BlurRadius="5" Opacity="0.5"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DropTextStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="DimGray"/>
+            <Setter Property="IsHitTestVisible" Value="False"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+        </Style>
+
+        <!-- Input Path Style - Remove IsDragOver Trigger -->
+        <Style x:Key="InputPathBorderStyle" TargetType="Border">
+            <Setter Property="BorderBrush" Value="Gray"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}"/>
+            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
+            <Setter Property="AllowDrop" Value="True"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="LightGray" Direction="320" ShadowDepth="3" BlurRadius="3" Opacity="0.3"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="InputPathTextBoxStyle" TargetType="TextBox">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="AllowDrop" Value="True"/>
+            <Setter Property="Padding" Value="5,0"/>
+            <Setter Property="Foreground" Value="Gray"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="MinWidth" Value="200"/>
+        </Style>
+
+        <Color x:Key="GradientStopColor1">#FF4F4F4F</Color>
+
+        <!-- Style for the Reset Button -->
+        <Style x:Key="ResetButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+            <Setter Property="Background" Value="#FFFF6347"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#FFDC143C"/>
+            <Setter Property="Width" Value="150"/>
+            <!-- Adjusted width to match Generate/Start buttons -->
+            <Setter Property="Height" Value="35"/>
+            <!-- Adjusted height -->
+            <Setter Property="Margin" Value="0,10,0,0"/>
+            <!-- Add margin to top for spacing -->
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FFFF7F50"/>
+                    <Setter Property="BorderBrush" Value="#FFCD5C5C"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#FFFA8072"/>
+                    <Setter Property="BorderBrush" Value="#FFB22222"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </Window.Resources>
+
+    <Grid Margin="10,10,10,10" Height="865" VerticalAlignment="Top">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" MinHeight="365"/>
+            <RowDefinition Height="200"/>
+            <RowDefinition Height="35"/>
+            <RowDefinition Height="35"/>
+            <RowDefinition Height="Auto" MinHeight="39.91"/>
+            <RowDefinition Height="Auto" MinHeight="20"/>
+
+        </Grid.RowDefinitions>
+
+        <!-- Row 0: Input Path, Browse Button, Language Dropdown -->
+        <Grid Grid.Row="0" Margin="0,0,0,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Border x:Name="pnlDragDrop" Style="{StaticResource InputPathBorderStyle}" Grid.Column="0"
+                    DragEnter="Panel_DragEnter" DragLeave="Panel_DragLeave" Drop="Panel_DragDrop">
+                <TextBox x:Name="txtFolderPath" Style="{StaticResource InputPathTextBoxStyle}"
+                         Text="未选择文件夹/源图片"
+                         TextChanged="TxtFolderPath_TextChanged" GotFocus="TxtFolderPath_GotFocus" LostFocus="TxtFolderPath_LostFocus"
+                         DragEnter="TextBox_DragEnter" Drop="TextBox_DragDrop" Margin="-18,0,217,0" />
+            </Border>
+            <Button x:Name="btnBrowseFolder" Style="{StaticResource BrowseButtonStyle}" Grid.Column="1"
+                    Content="浏览..." Click="BtnBrowseFolder_Click" Margin="0,0,5,0"/>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                <ComboBox x:Name="cmbLanguage" Width="65" Margin="0,0,0,0" SelectionChanged="CmbLanguage_SelectionChanged" Height="26"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Row 1: Main Options (Directory, EXIF, Video) and Action Buttons + Reset Button -->
+        <Grid Grid.Row="1" Height="352" VerticalAlignment="Center" Margin="-10,0,-10,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="74*"/>
+                <ColumnDefinition Width="55*"/>
+                <ColumnDefinition Width="55*"/>
+                <ColumnDefinition Width="199.999"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Col 0: 创建目录选项 GroupBox -->
+            <GroupBox Header="创建目录选项" Grid.Column="0" Margin="0,0,10,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="10">
+                        <Button x:Name="SelectFolderButton" Margin="0,5" Click="SelectFolder_Click" Foreground="#FF091C02" Background="#FFFFEC00" FontWeight="Bold" BorderBrush="{x:Null}" Height="25" IsCancel="True" IsDefault="True">
+                            <StackPanel Orientation="Horizontal">
+
+                                <!-- Folder Icon -->
+                                <TextBlock Text="选择根目录"/>
+                            </StackPanel>
+                        </Button>
+                        <TextBlock Text="根目录路径：" Margin="{StaticResource ControlMargin}"/>
+                        <TextBox x:Name="BasePathBox" Margin="0,5,0,10" TextChanged="DirectoryConfig_TextChanged" Text="请选择文件夹或粘贴路径到这" FontSize="9" Style="{StaticResource OptionTextBoxStyle}" Height="Auto"/>
+
+                        <TextBlock Text="根目录前缀：" Margin="{StaticResource ControlMargin}"/>
+                        <TextBox x:Name="PrefixBox" Text="IMG" Margin="0,5" TextChanged="DirectoryConfig_TextChanged" Style="{StaticResource OptionTextBoxStyle}"/>
+
+                        <TextBlock Text="数量：" Margin="{StaticResource ControlMargin}"/>
+                        <TextBox x:Name="CountBox" Text="2" Margin="0,5"  TextChanged="DirectoryConfig_TextChanged" Style="{StaticResource OptionTextBoxStyle}"/>
+
+                        <CheckBox x:Name="RecursiveCheck" Content="生成子目录" IsChecked="True" Margin="0,5,0,15" Checked="DirectoryConfig_InputChanged" Unchecked="DirectoryConfig_InputChanged" Style="{StaticResource OptionCheckBoxStyle}" />
+
+                        <Button x:Name="GenerateButton"
+                                Click="Generate_Click"
+                                Margin="0,5" Background="#FFFFFAB1" FontWeight="Bold" BorderBrush="{x:Null}" Height="28">
+                            <StackPanel Orientation="Horizontal">
+
+                                <!-- Directory Icon -->
+                                <TextBlock Text="生成根/子目录"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <TreeView
+                        Grid.Column="1"
+                        x:Name="PreviewTree"
+                        Margin="10,10,5,12"
+                        FontSize="9" />
+                </Grid>
+            </GroupBox>
+
+            <!-- Col 1: EXIF/重命名选项 GroupBox -->
+            <GroupBox x:Name="gbRenameBackup" Header="EXIF/重命名选项" Grid.Column="1" Margin="0,0,10,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <CheckBox x:Name="chkRenameFoldersOnly" Style="{StaticResource OptionCheckBoxStyle}" Content="仅命名目录 (_O)" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Checked="RenamingOnly_CheckedChanged" Unchecked="RenamingOnly_CheckedChanged" Background="#FFDBE620" HorizontalAlignment="Left"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center" Margin="15,3,0,3">
+                        <Label x:Name="lblBackupPrefix" Style="{StaticResource OptionLabelStyle}" Content="备份或目录前缀:"/>
+                        <TextBox x:Name="txtBackupPrefix" Style="{StaticResource OptionTextBoxStyle}" Text="Backup_" Width="Auto" Background="#FFE5F19B"/>
+                    </StackPanel>
+
+                    <CheckBox x:Name="chkRenameFilesOnly" Style="{StaticResource OptionCheckBoxStyle}" Content="仅命名文件 (_N)" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Checked="RenamingOnly_CheckedChanged" Unchecked="RenamingOnly_CheckedChanged" Background="#FF1AD437" HorizontalAlignment="Left"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center" Margin="15,3,0,3">
+                        <Label x:Name="lblRenamePrefix" Style="{StaticResource OptionLabelStyle}" Content="命名源文件前缀:"/>
+                        <TextBox x:Name="txtRenamePrefix" Style="{StaticResource OptionTextBoxStyle}" Text="JYH_" Width="Auto" Background="#FF8CDA85"/>
+                    </StackPanel>
+
+                    <CheckBox x:Name="chkEnableTimestamp" Style="{StaticResource OptionCheckBoxStyle}" Content="启用时间戳" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" IsChecked="True" Checked="ChkEnableTimestamp_CheckedChanged" Unchecked="ChkEnableTimestamp_CheckedChanged" Background="#FF16CA31" HorizontalAlignment="Left"/>
+                    <Label x:Name="lblTimestampFormat" Style="{StaticResource OptionLabelStyle}" Content="时间戳格式:" Target="{Binding ElementName=txtTimestampFormat}" Grid.Row="5" Grid.Column="0" Margin="15,3,5,3"/>
+                    <TextBox x:Name="txtTimestampFormat" Style="{StaticResource OptionTextBoxStyle}" Text="yyyyMMdd_HHmm_" Grid.Row="5" Grid.Column="1" IsEnabled="{Binding IsChecked, ElementName=chkEnableTimestamp}"/>
+
+                    <CheckBox x:Name="chkEnableCounter" Style="{StaticResource OptionCheckBoxStyle}" Content="启用计数器" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" IsChecked="True" Checked="ChkEnableCounter_CheckedChanged" Unchecked="ChkEnableCounter_CheckedChanged" Background="#FF15D632" HorizontalAlignment="Left"/>
+                    <Label x:Name="lblCounterStartValue" Style="{StaticResource OptionLabelStyle}" Content="计数器起始值:" Target="{Binding ElementName=txtCounterStartValue}" Grid.Row="7" Grid.Column="0" Margin="15,3,5,3"/>
+                    <TextBox x:Name="txtCounterStartValue" Style="{StaticResource OptionTextBoxStyle}" Text="1" Grid.Row="7" Grid.Column="1" IsEnabled="{Binding IsChecked, ElementName=chkEnableCounter}"/>
+                    <Label x:Name="lblCounterFormat" Style="{StaticResource OptionLabelStyle}" Content="计数器格式:" Target="{Binding ElementName=txtCounterFormat}" Grid.Row="8" Grid.Column="0" Margin="15,3,5,3"/>
+                    <TextBox x:Name="txtCounterFormat" Style="{StaticResource OptionTextBoxStyle}" Text="D2" Grid.Row="8" Grid.Column="1" IsEnabled="{Binding IsChecked, ElementName=chkCounter}"/>
+
+                    <Separator Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" Margin="{StaticResource SectionMargin}"/>
+
+                    <CheckBox x:Name="chkEnableBackup" Style="{StaticResource OptionCheckBoxStyle}" Content="启用备份 (_B)" Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="2" IsChecked="True" HorizontalAlignment="Left" Checked="ChkEnableBackup_CheckedChanged" Unchecked="ChkEnableBackup_CheckedChanged" Background="#FF13DC1F"/>
+                    <CheckBox x:Name="chkDisableBackup" Style="{StaticResource OptionCheckBoxStyle}" Content="禁用备份 (_D)" Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Left" Checked="chkDisableBackup_CheckedChanged" Unchecked="chkDisableBackup_CheckedChanged" Margin="0,3,0,10" Background="#FFDE0E0E"/>
+
+
+                    <Label x:Name="lblProcessingTool" Style="{StaticResource OptionLabelStyle}" Content="处理工具:" Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Left"/>
+                    <ComboBox x:Name="cmbProcessingTool" SelectedIndex="0" Width="150" Grid.Row="13" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Left" SelectionChanged="cmbProcessingTool_SelectionChanged">
+                        <ComboBoxItem Content="ExifTool (推荐)" Tag="ExifTool"/>
+                        <ComboBoxItem Content="ImageMagick" Tag="ImageMagick"/>
+                    </ComboBox>
+                </Grid>
+            </GroupBox>
+
+            <!-- Col 2: Video/Animation Options -->
+            <GroupBox x:Name="gbVideo" Header="视频/动画选项" Grid.Column="2" Margin="0,0,10,0">
+                <StackPanel Orientation="Vertical">
+                    <CheckBox x:Name="chkEnableZoompan" Style="{StaticResource OptionCheckBoxStyle}" Content="启用 ZoomPan 效果" Checked="ChkEnableZoompan_CheckedChanged" Unchecked="ChkEnableZoompan_CheckedChanged" Background="#FF26D820"/>
+                    <Button x:Name="btnZoompanSettings" Style="{StaticResource BaseButtonStyle}" Content="效果设置..." IsEnabled="{Binding IsChecked, ElementName=chkEnableZoompan}" Click="BtnZoompanSettings_Click" Width="120" HorizontalAlignment="Left" Margin="0,0,0,10"/>
+
+                    <Separator/>
+
+                    <Label x:Name="lblOutputFormat" Style="{StaticResource OptionLabelStyle}" Content="输出格式:" Margin="0,5,0,0"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,3,0,10">
+                        <RadioButton x:Name="rbFormatMov" Content="MOV (H.265)" GroupName="OutputFormat" IsChecked="True" Margin="0,0,10,0" VerticalAlignment="Center" Background="#FF30EA0A"/>
+                        <RadioButton x:Name="rbFormatMp4" Content="MP4 (H.264)" GroupName="OutputFormat" Margin="0,0,10,0" VerticalAlignment="Center" Background="#FFFEEFFF"/>
+                        <RadioButton x:Name="rbFormatGif" Content="GIF" GroupName="OutputFormat" VerticalAlignment="Center" Background="#FFBCDAE2"/>
+                    </StackPanel>
+
+                    <CheckBox x:Name="chkBurstMode" Style="{StaticResource OptionCheckBoxStyle}" Content="连拍模式 (多图转单视频/GIF)" Checked="ChkBurstMode_CheckedChanged" Unchecked="ChkBurstMode_CheckedChanged" ToolTip="将选定文件夹中的所有图片按顺序合成为一个文件。ZoomPan效果将不适用。" Background="#FF1FD21A"/>
+                    <CheckBox x:Name="chkTimestampSubfolder" Style="{StaticResource OptionCheckBoxStyle}" Content="输出到时间戳子文件夹" IsChecked="True" ToolTip="Requires 'Enable Timestamp' to be checked as well." Background="#FF1ED019"/>
+
+                    <Label x:Name="lblOutputResolution" Style="{StaticResource OptionLabelStyle}" Content="输出分辨率 (非连拍模式):"/>
+                    <ComboBox x:Name="cmbOutputResolution" SelectedIndex="0" Width="150" HorizontalAlignment="Left" Margin="{StaticResource ControlMargin}">
+                        <ComboBoxItem Content="源分辨率 (Default)" Tag="source"/>
+                        <ComboBoxItem Content="1920x1080 (FHD)" Tag="1920x1080"/>
+                        <ComboBoxItem Content="2560x1440 (2K)" Tag="2560x1440"/>
+                        <ComboBoxItem Content="3840x2160 (4K)" Tag="3840x2160"/>
+                        <ComboBoxItem Content="1080x1920 (竖屏)" Tag="1080x1920"/>
+                    </ComboBox>
+
+                    <Label x:Name="lblOutputFps" Style="{StaticResource OptionLabelStyle}" Content="输出帧率 (连拍模式):"/>
+                    <ComboBox x:Name="cmbOutputFps" SelectedIndex="1" Width="150" HorizontalAlignment="Left" Margin="{StaticResource ControlMargin}" SelectionChanged="cmbOutputFps_SelectionChanged">
+                        <ComboBoxItem x:Name="cmbFps10" Content="10 FPS" Tag="10"/>
+                        <ComboBoxItem x:Name="cmbFps15" Content="15 FPS" Tag="15"/>
+                        <ComboBoxItem x:Name="cmbFps24" Content="24 FPS" Tag="24"/>
+                        <ComboBoxItem x:Name="cmbFps30" Content="30 FPS" Tag="30"/>
+                        <ComboBoxItem x:Name="cmbFps60" Content="60 FPS" Tag="60"/>
+                        <ComboBoxItem x:Name="cmbFps120" Content="120 FPS" Tag="120"/>
+                    </ComboBox>
+                </StackPanel>
+            </GroupBox>
+
+            <!-- Col 3: Action Buttons -->
+            <StackPanel Grid.Column="3" Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Height="238" Width="150" Margin="21,37,0,0">
+                <!-- Apply BaseButtonStyle directly and set properties -->
+                <Button x:Name="btnSelectFolder" Style="{StaticResource BaseButtonStyle}"
+                        Click="BtnSelectFolder_Click"
+                        Background="#FFFFDE03" BorderBrush="{x:Null}" FontWeight="Bold"
+                        Margin="0,5,0,5">
+                    <StackPanel Orientation="Horizontal">
+
+                        <!-- Folder Icon -->
+                        <TextBlock Text="选择文件夹"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="btnSelectImages" Style="{StaticResource BaseButtonStyle}"
+                        Click="BtnSelectImages_Click"
+                        Background="#FF78E9EC" BorderBrush="{x:Null}" FontWeight="Bold"
+                        Margin="0,5,0,5">
+                    <StackPanel Orientation="Horizontal">
+
+                        <!-- Image Icon -->
+                        <TextBlock Text="选择图片"/>
+                    </StackPanel>
+                </Button>
+
+                <Separator Margin="0,10,0,10"/>
+
+                <Button x:Name="btnStartProcessing" Style="{StaticResource StartProcessingButtonStyle}"
+                        Content="运行EXIF/命名" Click="BtnStartProcessing_Click" IsEnabled="False"
+                        ToolTip="执行EXIF清理或直接重命名操作" Background="#FFA9E9E6" BorderBrush="#FFF98EB5"
+                        FontSize="13" IsDefault="True" Cursor="Arrow"
+                        Margin="0,0,0,10"/>
+                <Button x:Name="btnGenerateZoompan" Style="{StaticResource GenerateButtonStyle}"
+                        Content="生成视频/动画" Click="BtnGenerateZoompan_Click" IsEnabled="{Binding IsEnabled, ElementName=btnStartProcessing}"
+                        ToolTip="根据视频/动画选项生成输出文件" FontSize="13" FontWeight="Bold"
+                        BorderBrush="#FFAFE1E9" Foreground="#FF02363B" Background="#FFFFA6CA"
+                        Margin="0,0,0,0"/>
+
+                <!-- Reset Button moved here -->
+                <Button x:Name="btnResetParameters" Content="🔄 重置参数" Click="BtnResetParameters_Click" Style="{StaticResource ResetButtonStyle}"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Row 2, 3, 4: Custom Paths in their own GroupBox -->
+        <GroupBox x:Name="Pathname" Grid.Row="2" Header="自定义路径选项 (✔优先可选) " Foreground="#FF39BA1D" Margin="0,3,0,22"  >
+            <StackPanel Orientation="Vertical" Height="137" VerticalAlignment="Top">
+                <!-- Custom Backup Path -->
+                <Grid Margin="{StaticResource SectionMargin}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="BrowseButtonGroup"/>
+                    </Grid.ColumnDefinitions>
+                    <CheckBox x:Name="chkUseCustomBackupPath2" Style="{StaticResource OptionCheckBoxStyle}" Content="自定义备份输出路径" Grid.Column="0" Checked="chkUseCustomBackupPath2_CheckedChanged" Unchecked="chkUseCustomBackupPath2_CheckedChanged" Background="#FF1BDE15" HorizontalAlignment="Left"/>
+                    <TextBox x:Name="txtCustomBackupPath2" Style="{StaticResource OptionTextBoxStyle}" Grid.Column="1" IsEnabled="{Binding IsChecked, ElementName=chkUseCustomBackupPath2}" Margin="5,0"/>
+                    <Button x:Name="btnSelectCustomBackupPath" Style="{StaticResource BrowseButtonStyle}" Grid.Column="2" Content="浏览输出文件夹" Click="btnSelectCustomBackupPath_Click" IsEnabled="{Binding IsChecked, ElementName=chkUseCustomBackupPath2}"/>
+                </Grid>
+                <!-- Custom Image Output Path -->
+                <Grid Margin="{StaticResource SectionMargin}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="BrowseButtonGroup"/>
+                    </Grid.ColumnDefinitions>
+                    <CheckBox x:Name="chkUseCustomImageOutputPath" Style="{StaticResource OptionCheckBoxStyle}" Content="自定义图像输出路径" Grid.Column="0" ToolTip="将EXIF处理后的图像输出到指定文件夹，而不是原始位置。" Checked="ChkUseCustomImageOutputPath_CheckedChanged" Unchecked="ChkUseCustomImageOutputPath_CheckedChanged" Background="#FF40D621" HorizontalAlignment="Left"/>
+                    <TextBox x:Name="txtCustomImageOutputPath" Style="{StaticResource OptionTextBoxStyle}" Grid.Column="1" IsEnabled="{Binding IsChecked, ElementName=chkUseCustomImageOutputPath}" Margin="5,0"/>
+                    <Button x:Name="btnSelectCustomImageOutputPath" Style="{StaticResource BrowseButtonStyle}" Grid.Column="2" Content="浏览输出文件夹" Click="btnSelectCustomImageOutputPath_Click" IsEnabled="{Binding IsChecked, ElementName=chkUseCustomImageOutputPath}"/>
+                </Grid>
+                <!-- Custom Video Output Path -->
+                <Grid Margin="{StaticResource SectionMargin}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="BrowseButtonGroup"/>
+                    </Grid.ColumnDefinitions>
+                    <CheckBox x:Name="chkUseCustomVideoOutputPath" Style="{StaticResource OptionCheckBoxStyle}" Content="自定义视频输出路径" Grid.Column="0" ToolTip="将生成的视频/动画输出到指定文件夹，而不是默认的 'Output' 文件夹。" Checked="ChkUseCustomVideoOutputPath_CheckedChanged" Unchecked="ChkUseCustomVideoOutputPath_CheckedChanged" Background="#FF32D611" HorizontalAlignment="Left"/>
+                    <TextBox x:Name="txtCustomVideoOutputPath" Style="{StaticResource OptionTextBoxStyle}" Grid.Column="1" IsEnabled="{Binding IsChecked, ElementName=chkUseCustomVideoOutputPath}" Margin="5,0"/>
+                    <Button x:Name="btnSelectCustomVideoOutputPath" Style="{StaticResource BrowseButtonStyle}" Grid.Column="2" Content="浏览输出文件夹" Click="btnSelectCustomVideoOutputPath_Click" IsEnabled="{Binding IsChecked, ElementName=chkUseCustomVideoOutputPath}"/>
+                </Grid>
+            </StackPanel>
+        </GroupBox>
+
+
+        <!-- Row 5: Drop Area -->
+        <Border x:Name="DropAreaBorder" Style="{StaticResource DropBorderStyle}" Grid.Row="3"
+                DragEnter="Panel_DragEnter" DragLeave="Panel_DragLeave" Drop="Window_Drop" Height="28" VerticalAlignment="Top" Margin="0,5,0,0" >
+            <TextBlock Style="{StaticResource DropTextStyle}" Text="拖动文件夹或图像到此处" HorizontalAlignment="Left" Margin="413,0,0,0"/>
+        </Border>
+
+        <!-- Row 6: Progress Bar -->
+        <Grid Grid.Row="4">
+            <Grid.OpacityMask>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="Black"/>
+                    <GradientStop Color="White" Offset="1"/>
+                </LinearGradientBrush>
+            </Grid.OpacityMask>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="459*"/>
+                <ColumnDefinition Width="565*"/>
+            </Grid.ColumnDefinitions>
+            <Label Content="处理进度>>>" Grid.Column="0" VerticalAlignment="Center" Padding="5,0,3,0"/>
+            <ProgressBar x:Name="progressBar"
+             Grid.Column="1"
+             Height="18"
+             Minimum="0"
+             Maximum="100"
+             Margin="5,5,0,5"
+             IsIndeterminate="False"
+             Background="#00000000"
+             Foreground="#FF4CAF50"
+             ValueChanged="progressBar_ValueChanged" Grid.ColumnSpan="2">
+
+                <ProgressBar.Template>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Grid Height="18">
+                            <Border BorderThickness="1" CornerRadius="9"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    Background="{TemplateBinding Background}"/>
+
+                            <Grid x:Name="PART_Track" Margin="1" ClipToBounds="True">
+                                <Rectangle x:Name="PART_Indicator"
+                                           HorizontalAlignment="Left"
+                                           RadiusX="7" RadiusY="7">
+                                    <Rectangle.Fill>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#4CAF50" Offset="0"/>
+                                            <GradientStop Color="#A5D6A7" Offset="0.5"/>
+                                            <GradientStop Color="#00FF00" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </Grid>
+                            <TextBlock Text="{Binding Path=Value, RelativeSource={RelativeSource TemplatedParent}, StringFormat={}{0:F0}%}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+                                       FontSize="10"/>
+                        </Grid>
+                    </ControlTemplate>
+                </ProgressBar.Template>
+            </ProgressBar>
+
+        </Grid >
+
+
+
+        <!-- Row 7: Log Label -->
+        <Label x:Name="LogLabelElement" Content="处理日志:" Grid.Row="5" Padding="5,2,0,2" VerticalAlignment="Center" FontWeight="SemiBold" Height="18"/>
+
+        <!-- Row 8: Log Area -->
+        <TextBox x:Name="TbLog" Grid.Row="7" VerticalScrollBarVisibility="Auto" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" FontFamily="Consolas" FontSize="11" BorderThickness="1" BorderBrush="DarkGray" TextChanged="TbLog_TextChanged" Padding="5" Margin="0,21,0,-16">
+            <TextBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem x:Name="clearLogItem" Header="清除日志" Click="ClearLog_Click"/>
+                    <MenuItem x:Name="saveLogItem" Header="保存日志" Click="SaveLog_Click"/>
+                </ContextMenu>
+            </TextBox.ContextMenu>
+        </TextBox>
+
+        <!-- Row 9: Status Bar -->
+        <StatusBar x:Name="MainStatusBar" Grid.Row="6" Height="24" VerticalAlignment="Top" Margin="0,12,0,0" Grid.RowSpan="2">
+            <StatusBarItem>
+                <TextBlock x:Name="lblProcessStatus" Text="Ready"/>
+            </StatusBarItem>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"/>
+            <StatusBarItem>
+                <TextBlock x:Name="lblImageCount" Text="Selected Items: 0"/>
+            </StatusBarItem>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"/>
+            <StatusBarItem>
+                <TextBlock x:Name="lblProgressHint" Text="Progress:"/>
+            </StatusBarItem>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"/>
+            <StatusBarItem>
+                <TextBlock x:Name="lblStartTime" Text="Start: -"/>
+            </StatusBarItem>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"/>
+            <StatusBarItem>
+                <TextBlock x:Name="lblEndTime" Text="End: -"/>
+            </StatusBarItem>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"/>
+            <StatusBarItem>
+                <TextBlock x:Name="lblElapsedTime" Text="Elapsed: -"/>
+            </StatusBarItem>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"/>
+            <StatusBarItem>
+                <TextBlock x:Name="lblTotalTime" Text="Total: -"/>
+            </StatusBarItem>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"/>
+            <StatusBarItem>
+                <TextBlock x:Name="lblConcurrentTasks" Text="Concurrent: 0"/>
+            </StatusBarItem>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"/>
+            <StatusBarItem DockPanel.Dock="Right" HorizontalContentAlignment="Right">
+                <TextBlock x:Name="lblRealTimeClock" Text="00:00:00" HorizontalAlignment="Left" TextAlignment="Right"/>
+            </StatusBarItem>
+        </StatusBar>
+
+    </Grid>
+</Window>

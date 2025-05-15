@@ -1,0 +1,20 @@
+﻿<Application x:Class="Hui_WPF.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Hui_WPF"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <!-- Define application-level converters -->
+        <local:EnumToBooleanConverter x:Key="EnumToBooleanConverter"/>
+        <local:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+        <local:ProgressToBrushConverter x:Key="ProgressColorConverter"/>
+        <local:PanDirectionToStringConverter x:Key="PanDirectionConverter"/>
+        <local:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
+
+        <!-- Instantiate EnumValuesExtension using the Type property -->
+        <local:EnumValuesExtension x:Key="EffectTypeEnumValues" Type="{x:Type local:ZoompanEffectType}" />
+
+        <!-- Other App-Level Resources -->
+
+    </Application.Resources>
+</Application>

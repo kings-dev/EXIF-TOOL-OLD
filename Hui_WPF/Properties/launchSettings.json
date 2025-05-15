@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Hui": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}

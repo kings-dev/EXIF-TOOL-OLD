@@ -1,0 +1,30 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Hui_WPF" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="UserLanguage" Type="System.String" Scope="User">
+      <Value Profile="(Default)">zh</Value>
+    </Setting>
+    <Setting Name="UserTimestampFormat" Type="System.String" Scope="User">
+      <Value Profile="(Default)">yyyyMMdd_HHmmss</Value>
+    </Setting>
+    <Setting Name="UserEnableTimestamp" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="UserCounterFormat" Type="System.String" Scope="User">
+      <Value Profile="(Default)">D3</Value>
+    </Setting>
+    <Setting Name="UserCounterStartValue" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="UserEnableCounter" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="UserImageOutputPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="UserVideoOutputPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+  </Settings>
+</SettingsFile>
